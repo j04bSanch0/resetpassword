@@ -82,7 +82,7 @@
 <div class="login-container">
   <h1>Password Reset</h1>
 
-  <label for="officerId">Badge Number:</label>
+  <label for="badgeNumber">Badge Number:</label>
   <input type="text" id="badgeNum" placeholder="PNT-0000" />
 
   <label for="newPassword">New Password:</label>
@@ -157,7 +157,7 @@
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
     const errorDiv = document.getElementById("error");
 
-    if (!officerId) {
+    if (!badgeNumber) {
       errorDiv.textContent = "Please enter an Officer ID.";
       return;
     }
@@ -196,13 +196,13 @@
       const newSaltHex = ab2hex(saltBuffer);
       const newHashHex = ab2hex(hashBuffer);
 
-      await update(ref(db, `Officer Accounts/${officerId}`), {
+      await update(ref(db, `Officer Accounts/${officerKey}`), {
         PasswordHash: newHashHex,
         Salt: newSaltHex,
       });
 
       errorDiv.style.color = "green";
-      errorDiv.textContent = `Password reset successful for ${officerId}!`;
+      errorDiv.textContent = `Password reset successful for ${officerKry}!`;
     } catch (err) {
       console.error(err);
       errorDiv.style.color = "red";
@@ -213,4 +213,5 @@
 
 </body>
 </html>
+
 
