@@ -82,8 +82,8 @@
 <div class="login-container">
   <h1>Password Reset</h1>
 
-  <label for="badgeNumber">Badge Number:</label>
-  <input type="text" id="badgeNum" placeholder="PNT-0000" />
+  <label for="badgeNum">Badge Number:</label>
+  <input type="text" id="badgeNumber" placeholder="PNT-0000" />
 
   <label for="newPassword">New Password:</label>
   <input type="password" id="newPassword" placeholder="Enter your new password" />
@@ -152,12 +152,12 @@
   }
 
   document.getElementById("resetPassBtn").addEventListener("click", async () => {
-    const badgeNumber = document.getElementById("badgeNum").value.trim();
+    const badgeNum = document.getElementById("badgeNumber").value.trim();
     const newPass = document.getElementById("newPassword").value.trim();
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
     const errorDiv = document.getElementById("error");
 
-    if (!badgeNumber) {
+    if (!badgeNum) {
       errorDiv.textContent = "Please enter an Officer ID.";
       return;
     }
@@ -178,7 +178,7 @@
      try {
       // Efficient lookup by badge_number
       const officersRef = ref(db, "Officer Accounts");
-      const q = query(officersRef, orderByChild("badge_number"), equalTo(badgeNumber));
+      const q = query(officersRef, orderByChild("badge_number"), equalTo(badgeNum));
       const snapshot = await get(q);
 
       let officerKey = null;
@@ -214,6 +214,7 @@
 
 </body>
 </html>
+
 
 
 
