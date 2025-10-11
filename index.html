@@ -82,8 +82,8 @@
 <div class="login-container">
   <h1>Password Reset</h1>
 
-  <label for="officerId">Officer ID:</label>
-  <input type="text" id="officerId" placeholder="e.g. Officer_001" />
+  <label for="officerId">Badge Number:</label>
+  <input type="text" id="badgeNum" placeholder="PNT-0000" />
 
   <label for="newPassword">New Password:</label>
   <input type="password" id="newPassword" placeholder="Enter your new password" />
@@ -152,7 +152,7 @@
   }
 
   document.getElementById("resetPassBtn").addEventListener("click", async () => {
-    const officerId = document.getElementById("officerId").value.trim();
+    const badgeNumber = document.getElementById("badgeNum").value.trim();
     const newPass = document.getElementById("newPassword").value.trim();
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
     const errorDiv = document.getElementById("error");
@@ -175,6 +175,21 @@
     }
 
     try {
+      const officersRef = ref(db, "Officer Accounts");
+      const snapshot = await get(officersRef);
+
+      let officerKey = null;
+      snapshot.forEach(child => {
+        if (child.val().badge_number === badgeNumber) {
+          officerKey = child.key;
+        }
+      });
+
+    if (!officerKey) {
+      errorDiv.textContent = "Officer not found for this badge number.";
+      return;
+    }
+
       const saltBuffer = generateSalt();
       const hashBuffer = await pbkdf2(newPass, saltBuffer);
 
@@ -198,3 +213,4 @@
 
 </body>
 </html>
+
