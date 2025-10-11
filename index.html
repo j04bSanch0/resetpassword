@@ -152,7 +152,8 @@
   }
 
   document.getElementById("resetPassBtn").addEventListener("click", async () => {
-    const badgeNum = document.getElementById("badgeNumber").value.trim();
+     const badgeInput = document.getElementById("badgeNumber").value.trim();
+    const badgeNum = badgeInput.toUpperCase();
     const newPass = document.getElementById("newPassword").value.trim();
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
     const errorDiv = document.getElementById("error");
@@ -214,6 +215,7 @@
 
 </body>
 </html>
+
 
 
 
