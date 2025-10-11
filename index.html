@@ -174,22 +174,23 @@
       return;
     }
 
+
+     try {
+      // Efficient lookup by badge_number
       const officersRef = ref(db, "Officer Accounts");
-      const snapshot = await get(officersRef);
+      const q = query(officersRef, orderByChild("badge_number"), equalTo(badgeNumber));
+      const snapshot = await get(q);
 
       let officerKey = null;
       snapshot.forEach(child => {
-        if (child.val().badge_number === badgeNumber) {
-          officerKey = child.key;
-        }
+        officerKey = child.key; // should be something like "Officer_002"
       });
 
-
-    if (!officerKey) {
-      errorDiv.textContent = "Officer not found for this badge number.";
-      return;
-    }
-
+      if (!officerKey) {
+        err.textContent = "Officer not found for this badge number.";
+        return;
+      }
+    
       const saltBuffer = generateSalt();
       const hashBuffer = await pbkdf2(newPass, saltBuffer);
 
@@ -213,6 +214,7 @@
 
 </body>
 </html>
+
 
 
 
