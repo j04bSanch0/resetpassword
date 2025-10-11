@@ -97,7 +97,8 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+  import { getDatabase, ref, update, get ,  query,
+    orderByChild, equalTo} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDom67kW1EqsFixZ_cs-0K74aSbIlVQ3CQ",
@@ -215,6 +216,7 @@
 
 </body>
 </html>
+
 
 
 
