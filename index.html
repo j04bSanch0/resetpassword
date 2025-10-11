@@ -208,7 +208,7 @@
       const salt = generateSalt();
       const hashBuffer = await pbkdf2(newPass, saltBuffer);
 
-      const newSaltHex = ab2hex(saltBuffer);
+      const newSaltHex = ab2hex(salt);
       const newHashHex = ab2hex(hashBuffer);
 
       await update(ref(db, `Officer Accounts/${officerKey}`), {
@@ -228,6 +228,7 @@
 
 </body>
 </html>
+
 
 
 
