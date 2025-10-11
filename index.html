@@ -225,10 +225,10 @@
 
       // ✅ Success feedback
       errorDiv.style.color = "green";
-      errorDiv.textContent = `✅ Password reset successful for ${officerKey}! Redirecting...`;
+      errorDiv.textContent = `✅ Password reset successful for ${officerKey}! <br> Redirecting...`;
 
       setTimeout(() => {
-        window.location.href = "login.html";
+        window.location.href = "https://mail.google.com/mail/u/0/#inbox";
       }, 2000);
 
     } catch (err) {
@@ -240,3 +240,4 @@
 </script>
 </body>
 </html>
+
