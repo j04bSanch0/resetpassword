@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,8 +82,8 @@
 <div class="login-container">
   <h1>Password Reset</h1>
 
-  <label for="officerId">Officer ID:</label>
-  <input type="text" id="officerId" placeholder="e.g. Officer_001" />
+  <label for="badgeNum">Badge Number:</label>
+  <input type="text" id="badgeNumber" placeholder="PNT-0000" />
 
   <label for="newPassword">New Password:</label>
   <input type="password" id="newPassword" placeholder="Enter your new password" />
@@ -108,6 +107,7 @@
     equalTo 
   } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
+  // ✅ Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDom67kW1EqsFixZ_cs-0K74aSbIlVQ3CQ",
     authDomain: "fir-crud-962b5.firebaseapp.com",
@@ -121,22 +121,26 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // PBKDF2 constants
   const PBKDF2_ITERATIONS = 100000;
   const PBKDF2_HASH = "SHA-256";
-  const PBKDF2_KEYLEN = 32; // 256-bit
+  const PBKDF2_KEYLEN = 32;
 
+  // Convert ArrayBuffer to Hex
   function ab2hex(buf) {
     return Array.from(new Uint8Array(buf))
       .map(x => ("00" + x.toString(16)).slice(-2))
       .join("");
   }
 
+  // Generate random salt
   function generateSalt(length = 16) {
     const salt = new Uint8Array(length);
     window.crypto.getRandomValues(salt);
     return salt;
   }
 
+  // PBKDF2 password hashing
   async function pbkdf2(password, salt) {
     const enc = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
@@ -165,9 +169,9 @@
     const newPass = document.getElementById("newPassword").value.trim();
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
     const errorDiv = document.getElementById("error");
-
     errorDiv.style.color = "red";
 
+    // ✅ Input validation
     if (!badgeNum) {
       errorDiv.textContent = "Please enter an Officer ID.";
       return;
@@ -186,6 +190,7 @@
     }
 
     try {
+      // 🔍 Look up Officer Account by badge_number
       const officersRef = ref(db, "Officer Accounts");
       const q = query(officersRef, orderByChild("badge_number"), equalTo(badgeNum));
       const snapshot = await get(q);
@@ -205,25 +210,27 @@
         return;
       }
 
-      // ✅ Fixed salt variable name
+      // 🔐 Generate salt and hash
       const salt = generateSalt();
       const hashBuffer = await pbkdf2(newPass, salt);
 
       const newSaltHex = ab2hex(salt);
       const newHashHex = ab2hex(hashBuffer);
 
+      // 📝 Update Firebase
       await update(ref(db, `Officer Accounts/${officerKey}`), {
         PasswordHash: newHashHex,
         Salt: newSaltHex,
       });
 
+      // ✅ Success feedback
       errorDiv.style.color = "green";
       errorDiv.textContent = `✅ Password reset successful for ${officerKey}! Redirecting...`;
 
-      // Optional redirect after 2 seconds
       setTimeout(() => {
         window.location.href = "login.html";
       }, 2000);
+
     } catch (err) {
       console.error("🔥 Firebase Error:", err);
       errorDiv.style.color = "red";
@@ -231,6 +238,5 @@
     }
   });
 </script>
-  </body>
+</body>
 </html>
-
