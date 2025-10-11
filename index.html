@@ -97,8 +97,15 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getDatabase, ref, update, get ,  query,
-    orderByChild, equalTo} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+  import { 
+    getDatabase, 
+    ref, 
+    update, 
+    get, 
+    query, 
+    orderByChild, 
+    equalTo 
+  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDom67kW1EqsFixZ_cs-0K74aSbIlVQ3CQ",
@@ -127,7 +134,7 @@
   function generateSalt(length = 16) {
     const salt = new Uint8Array(length);
     window.crypto.getRandomValues(salt);
-    return salt.buffer;
+    return salt;
   }
 
   async function pbkdf2(password, salt) {
@@ -183,13 +190,18 @@
       const q = query(officersRef, orderByChild("badge_number"), equalTo(badgeNum));
       const snapshot = await get(q);
 
+           if (!snapshot.exists()) {
+        errorDiv.textContent = "Officer not found for this badge number.";
+        return;
+      }
+
       let officerKey = null;
       snapshot.forEach(child => {
         officerKey = child.key; // should be something like "Officer_002"
       });
 
       if (!officerKey) {
-        err.textContent = "Officer not found for this badge number.";
+        errDiv.textContent = "Officer not found for this badge number.";
         return;
       }
     
@@ -216,6 +228,7 @@
 
 </body>
 </html>
+
 
 
 
