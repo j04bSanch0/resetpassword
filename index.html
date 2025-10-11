@@ -175,12 +175,12 @@
     }
 
     try {
-      const officersRef = ref(db, "Officer Accounts");
-      const snapshot = await get(officersRef);
+       const officersRef = ref(db, "Officer Accounts");
+        const q = query(officersRef, orderByChild("badge_number"), equalTo(badgeNumber));
+        const snapshot = await get(q);
 
       let officerKey = null;
       snapshot.forEach(child => {
-        if (child.val().badge_number === badgeNumber) {
           officerKey = child.key;
         }
       });
@@ -202,7 +202,7 @@
       });
 
       errorDiv.style.color = "green";
-      errorDiv.textContent = `Password reset successful for ${officerKry}!`;
+      errorDiv.textContent = `Password reset successful for ${officerKey}!`;
     } catch (err) {
       console.error(err);
       errorDiv.style.color = "red";
@@ -213,5 +213,6 @@
 
 </body>
 </html>
+
 
 
