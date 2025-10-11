@@ -201,11 +201,11 @@
       });
 
       if (!officerKey) {
-        errDiv.textContent = "Officer not found for this badge number.";
+        errorDiv.textContent = "Officer not found for this badge number.";
         return;
       }
     
-      const saltBuffer = generateSalt();
+      const salt = generateSalt();
       const hashBuffer = await pbkdf2(newPass, saltBuffer);
 
       const newSaltHex = ab2hex(saltBuffer);
@@ -228,6 +228,7 @@
 
 </body>
 </html>
+
 
 
 
