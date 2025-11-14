@@ -200,23 +200,23 @@
    const missing = [];
 
     if (newPass.length < 8) {
-      missing.push("8+ characters");
+      missing.push("must 8+ characters");
     }
     if (!/[A-Z]/.test(newPass)) {
-      missing.push("One uppercase letter");
+      missing.push("must include an uppercase letter");
     }
     if (!/[a-z]/.test(newPass)) {
-      missing.push("One lowercase letter");
+      missing.push("must include lowercase letter");
     }
     if (!/\d/.test(newPass)) {
-      missing.push("One number");
+      missing.push("must include a number");
     }
     if (!/[\W_]/.test(newPass)) {
-      missing.push("One special character (!@#$%)");
+      missing.push("must include a special character (!@#$%)");
     }
 
     if (missing.length > 0) {
-      errorDiv.innerHTML = "Password still needs:<br>• " + missing.join("<br>• ");
+      errorDiv.innerHTML =  missing.join("<br>• ");
       return;
     }
 
@@ -257,4 +257,5 @@
 
 </body>
 </html>
+
 
