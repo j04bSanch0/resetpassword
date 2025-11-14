@@ -16,7 +16,7 @@
     body {
       display: flex;
       align-items: center;
-      background-color: gainsboro; /* Matches login.html */
+      background-color: gainsboro;
       min-height: 100vh;
     }
 
@@ -34,7 +34,6 @@
       border-radius: 1rem;
     }
 
-    /* Toggle Eye Icon Styling */
     .password-wrapper {
       position: relative;
     }
@@ -49,7 +48,7 @@
       cursor: pointer;
       color: #6c757d;
       z-index: 5;
-      display: none; /* Hidden by default until text is typed */
+      display: none;
     }
 
     .password-toggle:focus {
@@ -64,13 +63,13 @@
     <div class="card-body p-4 p-md-5">
 
       <form onsubmit="return false;">
-        <img class="mb-4" src="assets/actdologo.png" alt="Logo" width="120" height="120" style="object-fit:contain;">
+        <img class="mb-4" src="actdologo.png" alt="Logo" width="120" height="120" style="object-fit:contain;">
 
         <h1 class="h3 mb-3 fw-normal">Reset Password</h1>
 
         <div class="form-floating mb-2">
-          <input type="text" class="form-control" id="officerId" placeholder="Officer ID">
-          <label for="officerId">Officer ID</label>
+          <input type="text" class="form-control" id="officerId" placeholder="Badge Number or ID">
+          <label for="officerId">Badge Number or User ID</label>
         </div>
 
         <div class="form-floating mb-2 password-wrapper">
@@ -105,7 +104,8 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getDatabase, ref, update, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+  // Added query, orderByChild, equalTo
+  import { getDatabase, ref, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDom67kW1EqsFixZ_cs-0K74aSbIlVQ3CQ",
@@ -120,12 +120,10 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // PBKDF2 Constants
   const PBKDF2_ITERATIONS = 100000;
   const PBKDF2_HASH = "SHA-256";
   const PBKDF2_KEYLEN = 32;
 
-  // Helper Functions
   function ab2hex(buf) {
     return Array.from(new Uint8Array(buf))
       .map(x => ("00" + x.toString(16)).slice(-2))
@@ -149,8 +147,6 @@
     );
   }
 
-
-  // Expose toggle function to global scope so HTML onclick works
   window.togglePassword = function(inputId, btnElement) {
     const input = document.getElementById(inputId);
     const icon = btnElement.querySelector('i');
@@ -164,28 +160,25 @@
     }
   };
 
-  // Show/Hide Toggle Buttons based on input
   ['newPassword', 'reEnterNewPassword'].forEach(id => {
     const input = document.getElementById(id);
     input.addEventListener('input', function() {
-        // Find the button immediately following this input
         const btn = this.parentElement.querySelector('.password-toggle');
         if(btn) btn.style.display = this.value.length > 0 ? 'block' : 'none';
     });
   });
 
   document.getElementById("resetPassBtn").addEventListener("click", async () => {
-    const officerId = document.getElementById("officerId").value.trim();
+    const inputId = document.getElementById("officerId").value.trim();
     const newPass = document.getElementById("newPassword").value.trim();
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
     const errorDiv = document.getElementById("error");
 
-    // Reset error state
-    errorDiv.style.color = "#dc3545"; // Bootstrap Danger Red
+    errorDiv.style.color = "#dc3545"; 
     errorDiv.textContent = "";
 
-    if (!officerId) {
-      errorDiv.textContent = "Please enter an Officer ID.";
+    if (!inputId) {
+      errorDiv.textContent = "Please enter a Badge Number or ID.";
       return;
     }
     if (!newPass || !rePass) {
@@ -198,36 +191,35 @@
     }
     
    const missing = [];
-
-    if (newPass.length < 8) {
-      missing.push("must 8+ characters");
-    }
-    if (!/[A-Z]/.test(newPass)) {
-      missing.push("must include an uppercase letter");
-    }
-    if (!/[a-z]/.test(newPass)) {
-      missing.push("must include lowercase letter");
-    }
-    if (!/\d/.test(newPass)) {
-      missing.push("must include a number");
-    }
-    if (!/[\W_]/.test(newPass)) {
-      missing.push("must include a special character (!@#$%)");
-    }
+    if (newPass.length < 8) missing.push("must be 8+ characters");
+    if (!/[A-Z]/.test(newPass)) missing.push("must include an uppercase letter");
+    if (!/[a-z]/.test(newPass)) missing.push("must include a lowercase letter");
+    if (!/\d/.test(newPass)) missing.push("must include a number");
+    if (!/[\W_]/.test(newPass)) missing.push("must include a special character (!@#$%)");
 
     if (missing.length > 0) {
-      errorDiv.innerHTML =  missing.join("<br>");
+      errorDiv.innerHTML = missing.join("<br>");
       return;
     }
 
     try {
-        // Optional: Check if user exists first to give better feedback
-        // (This assumes logic from your previous file targeting Officer Accounts)
-        const userRef = ref(db, `Officer Accounts/${officerId}`);
-        const snapshot = await get(userRef);
-        
-        if (!snapshot.exists()) {
-            errorDiv.textContent = "Officer ID not found.";
+        let foundPath = null;
+
+        // 1. SEARCH OFFICER ACCOUNTS BY BADGE NUMBER (Using Query)
+        const officerRef = ref(db, "Officer Accounts");
+        // Query: Search 'Officer Accounts' where 'badge_number' == inputId
+        const officerQuery = query(officerRef, orderByChild("badge_number"), equalTo(inputId));
+        const officerSnapshot = await get(officerQuery);
+
+        if (officerSnapshot.exists()) {
+            const keys = Object.keys(officerSnapshot.val());
+            const officerKey = keys[0]; 
+            foundPath = `Officer Accounts/${officerKey}`;
+        } 
+       
+
+        if (!foundPath) {
+            errorDiv.textContent = "Badge Number not found.";
             return;
         }
 
@@ -236,15 +228,15 @@
         const newSaltHex = ab2hex(saltBuffer);
         const newHashHex = ab2hex(hashBuffer);
 
-        await update(userRef, {
+        // Update the path we found
+        await update(ref(db, foundPath), {
             PasswordHash: newHashHex,
             Salt: newSaltHex,
         });
 
-        errorDiv.style.color = "#198754"; // Bootstrap Success Green
-        errorDiv.textContent = `Password reset successful for ${officerId}!`;
+        errorDiv.style.color = "#198754"; 
+        errorDiv.textContent = "Password reset successful!";
         
-        // Clear fields
         document.getElementById("newPassword").value = "";
         document.getElementById("reEnterNewPassword").value = "";
         
@@ -257,6 +249,3 @@
 
 </body>
 </html>
-
-
-
