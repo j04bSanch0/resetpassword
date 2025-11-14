@@ -149,12 +149,6 @@
     );
   }
 
-  // Standard Password Validation Regex
-  // At least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-  function isValidPassword(password) {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    return regex.test(password);
-  }
 
   // Expose toggle function to global scope so HTML onclick works
   window.togglePassword = function(inputId, btnElement) {
@@ -203,9 +197,26 @@
       return;
     }
     
-    // Strong Password Validation
-    if (!isValidPassword(newPass)) {
-      errorDiv.innerHTML = "Password must contain:<br>• 8+ characters<br>• Uppercase & Lowercase<br>• A Number<br>• A Special Character (!@#$%)";
+   const missing = [];
+
+    if (newPass.length < 8) {
+      missing.push("8+ characters");
+    }
+    if (!/[A-Z]/.test(newPass)) {
+      missing.push("One uppercase letter");
+    }
+    if (!/[a-z]/.test(newPass)) {
+      missing.push("One lowercase letter");
+    }
+    if (!/\d/.test(newPass)) {
+      missing.push("One number");
+    }
+    if (!/[\W_]/.test(newPass)) {
+      missing.push("One special character (!@#$%)");
+    }
+
+    if (missing.length > 0) {
+      errorDiv.innerHTML = "Password still needs:<br>• " + missing.join("<br>• ");
       return;
     }
 
@@ -246,3 +257,4 @@
 
 </body>
 </html>
+
