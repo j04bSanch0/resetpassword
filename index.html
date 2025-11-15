@@ -89,7 +89,7 @@
         </div>
 
         <button class="w-100 btn btn-lg btn-danger mt-2" type="button" id="resetPassBtn">
-            <span id="btnText">Confirm Reset</span>
+              Confirm Reset
             <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true" style="display: none;"></span>
         </button>
 
@@ -169,12 +169,11 @@ import { getDatabase, ref, update, get, query, orderByChild, equalTo } from "htt
 
   const resetPassBtn = document.getElementById("resetPassBtn");
   const spinner = resetPassBtn.querySelector(".spinner-border");
-  const btnText = document.getElementById("btnText");
+
 
    function setLoading(isLoading) {
     if (isLoading) {
       resetPassBtn.disabled = true;
-      btnText.style.display = "none";
       spinner.style.display = "inline-block";
     } else {
       resetPassBtn.disabled = false;
@@ -276,6 +275,7 @@ import { getDatabase, ref, update, get, query, orderByChild, equalTo } from "htt
 
 </body>
 </html>
+
 
 
 
