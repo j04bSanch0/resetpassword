@@ -88,11 +88,10 @@
           </button>
         </div>
 
-        <button class="w-100 btn btn-lg btn-danger mt-2" type="button" id="resetPassBtn">Confirm Reset</button>
-        
-        <div class="mt-3">
-            <a href="login.html" class="text-decoration-none text-muted">Back to Login</a>
-        </div>
+        <button class="w-100 btn btn-lg btn-danger mt-2" type="button" id="resetPassBtn">
+          Confirm Reset
+            <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true" style="display: none;"></span>
+        </button>
 
         <div id="error" class="mt-3 small fw-bold"></div>
 
@@ -105,7 +104,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   // Added query, orderByChild, equalTo
-  import { getDatabase, ref, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { getDatabase, ref, update, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDom67kW1EqsFixZ_cs-0K74aSbIlVQ3CQ",
@@ -168,7 +167,22 @@
     });
   });
 
-  document.getElementById("resetPassBtn").addEventListener("click", async () => {
+  const resetPassBtn = document.getElementById("resetPassBtn");
+  const spinner = resetPassBtn.querySelector(".spinner-border");
+
+   function setLoading(isLoading) {
+    if (isLoading) {
+      resetPassBtn.disabled = true;
+      spinner.style.display = "inline-block";
+    } else {
+      resetPassBtn.disabled = false;
+      spinner.style.display = "none";
+    }
+  }
+
+  resetPassBtn.addEventListener("click", async () => {
+    setLoading(true);
+    
     const inputId = document.getElementById("officerId").value.trim();
     const newPass = document.getElementById("newPassword").value.trim();
     const rePass = document.getElementById("reEnterNewPassword").value.trim();
@@ -179,19 +193,22 @@
 
     if (!inputId) {
       errorDiv.textContent = "Please enter a Badge Number or ID.";
+      setLoading(false)
       return;
     }
     if (!newPass || !rePass) {
       errorDiv.textContent = "Please fill in both password fields.";
+      setLoading(false)
       return;
     }
     if (newPass !== rePass) {
       errorDiv.textContent = "Passwords do not match.";
+      setLoading(false)
       return;
     }
     
    const missing = [];
-    if (newPass.length < 8) missing.push("must be 8+ characters");
+    if (newPass.length < 8) missing.push("must be 8+ characters"); 
     if (!/[A-Z]/.test(newPass)) missing.push("must include an uppercase letter");
     if (!/[a-z]/.test(newPass)) missing.push("must include a lowercase letter");
     if (!/\d/.test(newPass)) missing.push("must include a number");
@@ -199,6 +216,7 @@
 
     if (missing.length > 0) {
       errorDiv.innerHTML = missing.join("<br>");
+      setLoading(false)
       return;
     }
 
@@ -220,6 +238,7 @@
 
         if (!foundPath) {
             errorDiv.textContent = "Badge Number not found.";
+          setLoading(false)
             return;
         }
 
@@ -227,15 +246,20 @@
         const hashBuffer = await pbkdf2(newPass, saltBuffer);
         const newSaltHex = ab2hex(saltBuffer);
         const newHashHex = ab2hex(hashBuffer);
+        
 
         // Update the path we found
         await update(ref(db, foundPath), {
             PasswordHash: newHashHex,
             Salt: newSaltHex,
         });
-
+        
         errorDiv.style.color = "#198754"; 
         errorDiv.textContent = "Password reset successful!";
+       resetPassBtn.disabled = true;
+      setTimeout(() => {
+        window.location.href = "https://mail.google.com/mail/u/0/#inbox";
+      }, 2000);
         
         document.getElementById("newPassword").value = "";
         document.getElementById("reEnterNewPassword").value = "";
@@ -243,10 +267,12 @@
     } catch (err) {
       console.error(err);
       errorDiv.textContent = "Error resetting password. Please try again.";
+      setLoading(false)
     }
   });
 </script>
 
 </body>
 </html>
+
 
